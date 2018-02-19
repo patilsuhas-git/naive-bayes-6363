@@ -41,7 +41,6 @@ def probabilityClass( rowTrainPSet, rowTrainESet, rowTrainSet ) :
     return [ rowTrainPSet/rowTrainSet, rowTrainESet/rowTrainSet ]
 
 def uniqueDictList ( trainSet ) :
-    # print trainSet
     columnUniqueValueDict = []
     columnCount = 0
     for row in trainSet:
@@ -53,17 +52,9 @@ def uniqueDictList ( trainSet ) :
         tempDict = {}
         columnUniqueValueDict.append(tempDict)
 
-    # print len(columnUniqueValueDict)
-
     for row in trainSet:
-        print row
         for columnIndex in range(len(row)):
-            # print columnUniqueValueDict
-            # print row[columnIndex]
-            # print row
-            # print row[columnIndex], columnUniqueValueDict[columnIndex]
             if row[columnIndex] in columnUniqueValueDict[columnIndex]:
-                # print 'check clas'
                 columnUniqueValueDict[columnIndex][row[columnIndex]] = columnUniqueValueDict[columnIndex][row[columnIndex]] + 1
             else :
                 columnUniqueValueDict[columnIndex][row[columnIndex]] = 1
@@ -76,11 +67,9 @@ def main( filename, split ):
     dataset = readCSV( filename, dataset=[] )
     trainingDataSet = []
     testDataSet = []
-
     trainingDataSet, testDataSet = splitDataSet(dataset, split)
     dividedSet = {}
     dividedSet = splitTrainingDatabyClass(trainingDataSet)
-
     trainPoisonousList = []
     trainEdibleList = []
 
@@ -91,27 +80,16 @@ def main( filename, split ):
             trainEdibleList.extend( dividedSet[key] )
     probability_poisonous, probability_edible = probabilityClass( float(len(trainPoisonousList)), float(len(trainEdibleList)), float(len(trainingDataSet)) )
 
-
     columnUniqueValueDictPoisonous = uniqueDictList(trainPoisonousList)
     columnUniqueValueDictEdible = uniqueDictList(trainEdibleList)
 
-    print '********************edible*********************'
     for i in range(len(columnUniqueValueDictEdible)):
-        # print columnUniqueValueDictEdible[i]
         for k in columnUniqueValueDictEdible[i]:
-            # print columnUniqueValueDictEdible[i][k]/len(trainEdibleList)
             columnUniqueValueDictEdible[i][k] = float(columnUniqueValueDictEdible[i][k])/float(len(trainEdibleList))
 
-    print columnUniqueValueDictEdible
-
-    print '********************Poisonous*********************'
     for i in range(len(columnUniqueValueDictPoisonous)):
-        # print columnUniqueValueDictPoisonous[i]
         for k in columnUniqueValueDictPoisonous[i]:
-            # print columnUniqueValueDictEdible[i][k]/len(trainEdibleList)
             columnUniqueValueDictPoisonous[i][k] = float(columnUniqueValueDictPoisonous[i][k])/float(len(trainPoisonousList))
-
-    print columnUniqueValueDictPoisonous
 
     classifiedProbability = {}
 
@@ -122,18 +100,14 @@ def main( filename, split ):
         for column in range(len(row)-1):
             if row[column] in columnUniqueValueDictPoisonous[column]:
                 poisonousProbability = float(poisonousProbability) * float(columnUniqueValueDictPoisonous[column][row[column]])
-                # print 'poisonous==>> '+str(float(poisonousProbability))
             if row[column] in columnUniqueValueDictEdible[column]:
                 edibleProbability *= columnUniqueValueDictEdible[column][row[column]]
-                # print 'edible====>>'+str(float(edibleProbability))
 
         if poisonousProbability > edibleProbability:
             classifiedProbability[rowCount] = 'p'
         else :
             classifiedProbability[rowCount] = 'e'
         rowCount += 1
-
-    # print classifiedProbability
 
     correctCount = 0
     for row in range(len(testDataSet)):
@@ -143,6 +117,6 @@ def main( filename, split ):
             print 'Actual Class = ' + str(testDataSet[row][-1]) + ' Predicted class = '+ str(classifiedProbability[row])
 
     accuracy = (float(correctCount)/float(len(testDataSet))) * 100.0;
-    print accuracy
+    print 'Accuracy = '+ str(accuracy)
 
 main(filename='data/mushroom.csv', split=.50 )
